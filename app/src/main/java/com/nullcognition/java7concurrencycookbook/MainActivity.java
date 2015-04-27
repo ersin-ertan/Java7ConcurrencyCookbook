@@ -6,6 +6,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nullcognition.java7concurrencycookbook.chapter01.ComplexOrRecursiveTask;
+import com.nullcognition.java7concurrencycookbook.chapter01.DataSourceLoader;
+import com.nullcognition.java7concurrencycookbook.chapter01.FileClock;
+import com.nullcognition.java7concurrencycookbook.chapter01.NetworkConnectionLoader;
+import com.nullcognition.java7concurrencycookbook.chapter01.NewThread;
+import com.nullcognition.java7concurrencycookbook.chapter01.PrimeGen;
+
+import java.util.concurrent.TimeUnit;
+
 // Logcat stopped working, required restart. Not sure why it happened.
 
 public class MainActivity extends ActionBarActivity {
@@ -16,15 +25,78 @@ public class MainActivity extends ActionBarActivity {
 	  super.onCreate(savedInstanceState);
 	  setContentView(R.layout.activity_main);
 
-	  // simpleThread();
-	  Log.e(getClass().getSimpleName(), "starting thread info method");
-	  threadInfo();
+//	  simpleThread();
+//	  threadInfo();
+//	  interruptedThread();
+//	  complexThreadInterrupt();
+//	  sleepResumeThread();
+//	  finalizationThread();
+
+   }
+
+   private void finalizationThread(){
+
+	  DataSourceLoader dsl = new DataSourceLoader();
+	  Thread thread = new Thread(dsl, "dataSourceThread");
+
+	  NetworkConnectionLoader ncl = new NetworkConnectionLoader();
+	  Thread thread2 = new Thread(ncl, "networkConnectionLoader");
+
+	  thread.start();
+	  thread2.start();
+
+	  try{
+		 thread.join(); // will only return when both of these classes are done their Thread.run() methods
+		 thread2.join(); // may have a timeout
+	  }
+	  catch(InterruptedException e){Log.e(getClass().getSimpleName(), "interrupts");}
+
+	  Log.e(getClass().getSimpleName(), "Loaded DataSL & NetworkCL");
+   }
+
+   private void sleepResumeThread(){
+
+	  Thread fileClock = new FileClock();
+	  fileClock.start();
+
+	  try{
+		 TimeUnit.SECONDS.sleep(5);
+	  }
+	  catch(InterruptedException e){
+		 Log.e(getClass().getSimpleName(), "Interrupted from main method sleepResume");
+	  }
+
+	  fileClock.interrupt();
+
+   }
+
+   private void complexThreadInterrupt(){
+
+	  Thread complex = new ComplexOrRecursiveTask();
+	  complex.start();
+
+	  try{TimeUnit.SECONDS.sleep(1);}
+	  catch(InterruptedException e){
+		 Log.e(getClass().getSimpleName(), Thread.currentThread()
+												 .getName() + " interrupted");
+	  }
+	  complex.interrupt();
+
+   }
+
+   private void interruptedThread(){
+
+	  Thread primeGen = new PrimeGen();
+	  primeGen.start();
+
+	  try{ Thread.sleep(2500);} catch(InterruptedException e){e.printStackTrace();}
+	  primeGen.interrupt();
+
    }
 
    private void threadInfo(){
 
 	  Log.e(getClass().getSimpleName(), "started thread info method");
-
 
 	  Thread[] threads = new Thread[10];
 	  Thread.State[] states = new Thread.State[10];
@@ -60,7 +132,8 @@ public class MainActivity extends ActionBarActivity {
 
 			if(state != states[i]){
 			   states[i] = state;
-			   Log.e(getClass().getSimpleName(), threads[i].getState().toString());
+			   Log.e(getClass().getSimpleName(), threads[i].getState()
+														   .toString());
 			}
 
 			finished = finished && (states[i] == Thread.State.TERMINATED);
@@ -75,7 +148,6 @@ public class MainActivity extends ActionBarActivity {
 	  for(int i = 0; i < 5; i++){
 		 new Thread(new NewThread(i)).start();
 	  }
-
    }
 
    @Override
@@ -95,26 +167,5 @@ public class MainActivity extends ActionBarActivity {
 	  }
 
 	  return super.onOptionsItemSelected(item);
-   }
-}
-
-class NewThread implements Runnable {
-
-   int i;
-
-   public NewThread(int inI){ i = inI;}
-
-   @Override
-   public void run(){
-
-	  logCurrentThread();
-
-
-   }
-
-   private void logCurrentThread(){
-
-	  Log.e(getClass().getSimpleName(), Thread.currentThread()
-											  .getName() + " " + i);
    }
 }
