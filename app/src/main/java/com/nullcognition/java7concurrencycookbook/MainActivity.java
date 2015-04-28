@@ -6,13 +6,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nullcognition.java7concurrencycookbook.chapter01.AnEvent;
+import com.nullcognition.java7concurrencycookbook.chapter01.Cleaner;
 import com.nullcognition.java7concurrencycookbook.chapter01.ComplexOrRecursiveTask;
 import com.nullcognition.java7concurrencycookbook.chapter01.DataSourceLoader;
 import com.nullcognition.java7concurrencycookbook.chapter01.FileClock;
 import com.nullcognition.java7concurrencycookbook.chapter01.NetworkConnectionLoader;
 import com.nullcognition.java7concurrencycookbook.chapter01.NewThread;
 import com.nullcognition.java7concurrencycookbook.chapter01.PrimeGen;
+import com.nullcognition.java7concurrencycookbook.chapter01.Writer;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 
 // Logcat stopped working, required restart. Not sure why it happened.
@@ -31,6 +36,29 @@ public class MainActivity extends ActionBarActivity {
 //	  complexThreadInterrupt();
 //	  sleepResumeThread();
 //	  finalizationThread();
+	  daemonThread();
+
+   }
+
+   private void daemonThread(){
+
+	  Deque<AnEvent> deque = new ArrayDeque<>();
+
+	  for(int i = 0; i < 3; i++){
+		 new Writer(deque).start();
+	  }
+	  try{
+		 TimeUnit.SECONDS.sleep(1);
+	  }
+	  catch(InterruptedException e){
+		 Log.e("THREXA", "Sleep in main error");
+	  }
+	  new Cleaner(deque).start();
+	  // 3 writers - 1 cleaner
+	  int i = 0;
+	  int e = 0;
+	  int u = 0;
+
 
    }
 
