@@ -10,10 +10,16 @@ import com.nullcognition.java7concurrencycookbook.chapter01.AnEvent;
 import com.nullcognition.java7concurrencycookbook.chapter01.Cleaner;
 import com.nullcognition.java7concurrencycookbook.chapter01.ComplexOrRecursiveTask;
 import com.nullcognition.java7concurrencycookbook.chapter01.DataSourceLoader;
+import com.nullcognition.java7concurrencycookbook.chapter01.ExceptionHandler;
 import com.nullcognition.java7concurrencycookbook.chapter01.FileClock;
+import com.nullcognition.java7concurrencycookbook.chapter01.MyThreadFactory;
+import com.nullcognition.java7concurrencycookbook.chapter01.MyThreadGroup;
 import com.nullcognition.java7concurrencycookbook.chapter01.NetworkConnectionLoader;
 import com.nullcognition.java7concurrencycookbook.chapter01.NewThread;
 import com.nullcognition.java7concurrencycookbook.chapter01.PrimeGen;
+import com.nullcognition.java7concurrencycookbook.chapter01.SafeTask;
+import com.nullcognition.java7concurrencycookbook.chapter01.SearchTask;
+import com.nullcognition.java7concurrencycookbook.chapter01.Task;
 import com.nullcognition.java7concurrencycookbook.chapter01.Writer;
 
 import java.util.ArrayDeque;
@@ -36,7 +42,106 @@ public class MainActivity extends ActionBarActivity {
 //	  complexThreadInterrupt();
 //	  sleepResumeThread();
 //	  finalizationThread();
-	  daemonThread();
+//	  daemonThread();
+//	  threadException();
+//	  localThreadVar();
+//	  groupingThreads();
+//	  uncontrolledExceptions();
+//	  threadFactory();
+
+
+   }
+
+   private void threadFactory(){
+
+	  MyThreadFactory factory = new MyThreadFactory("MyThreadFactory");
+	  MyThreadFactory.Task task = new MyThreadFactory.Task();
+
+	  Thread thread;
+	  Log.e("AndDebug", "Starting threads");
+
+	  for(int i = 0; i < 10; i++){
+		 thread = factory.newThread(task);
+		 thread.start();
+	  }
+
+	  Log.e("AndDebug", "Factory stats " + factory.getStats());
+
+
+   }
+
+   private void uncontrolledExceptions(){ // exceptions are chained up the line from thread to thread group to JVM, this example is not working
+
+	  MyThreadGroup myThreadGroup = new MyThreadGroup("tg");
+	  Task task = new Task();
+
+	  for(int i = 0; i < 2; i++){
+		 Thread thread = new Thread(myThreadGroup, task);
+		 thread.start();
+	  }
+
+   }
+
+   public static String threadName = "";
+
+   private void groupingThreads(){
+
+	  ThreadGroup threadGroup = new ThreadGroup("searchTaskGroup");
+	  SearchTask st = new SearchTask();
+
+	  for(int i = 0; i < 5; i++){
+		 Thread t = new Thread(threadGroup, st);
+		 t.start();
+	  }
+
+	  Log.e("THREXA", String.valueOf(threadGroup.activeCount()) + " of threads in group ");
+
+	  Thread[] threads = new Thread[threadGroup.activeCount()];
+	  threadGroup.enumerate(threads);
+	  for(int i = 0; i < threadGroup.activeCount(); i++){
+		 Log.e("THREXA", threads[i].getName() + " " + threads[i].getState());
+	  }
+
+	  waitFinish(threadGroup);
+	  threadGroup.interrupt();
+
+	  Log.e("THREXA", threadName + " is the winner");
+
+   }
+
+   private void waitFinish(ThreadGroup threadGroup){
+
+	  while(threadGroup.activeCount() > 4){
+		 try{
+			TimeUnit.MILLISECONDS.sleep(100);
+		 }
+		 catch(InterruptedException e){
+			e.printStackTrace();
+		 }
+	  }
+   }
+
+   // variables that can only be read and written by the same thread. Thus, even if two threads are executing the same code, and the code has a
+   // reference to a ThreadLocal variable, then the two threads cannot see each other's ThreadLocal variables.
+   private void localThreadVar(){
+
+	  SafeTask task = new SafeTask();
+
+	  for(int i = 0; i < 10; i++){
+
+		 Thread thread = new Thread(task);
+		 thread.start();
+
+		 try{ TimeUnit.SECONDS.sleep(2);}
+		 catch(InterruptedException e){e.printStackTrace();}
+	  }
+   }
+
+   private void threadException(){
+
+	  Thread t = new Thread(new ExceptionHandler.Task());
+	  t.setUncaughtExceptionHandler(new ExceptionHandler());
+	  t.start();
 
    }
 
