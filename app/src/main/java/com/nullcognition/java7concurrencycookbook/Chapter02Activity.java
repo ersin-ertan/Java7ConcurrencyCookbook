@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.nullcognition.java7concurrencycookbook.chapter02.AttrbInSync;
+import com.nullcognition.java7concurrencycookbook.chapter02.ConditionsSync;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
 
 
@@ -18,9 +19,33 @@ public class Chapter02Activity extends ActionBarActivity {
         setContentView(R.layout.activity_chapter02);
 
 //        synchMethod();
-        attrbSync();
+//        attrbSync();
+//        conditionSync();
+        syncLock();
 
-        int debugPoint = 0;
+
+        int i = 0; // debug point
+    }
+
+    private void syncLock() {
+
+    }
+
+    private void conditionSync() {
+        ConditionsSync storage = new ConditionsSync();
+        ConditionsSync.Producer p = new ConditionsSync.Producer(storage);
+        ConditionsSync.Consumer c = new ConditionsSync.Consumer(storage);
+        Thread tp = new Thread(p);
+        Thread tc = new Thread(c);
+        tp.start();
+        tc.start();
+        try {
+            tp.join();
+            tc.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void attrbSync() {
