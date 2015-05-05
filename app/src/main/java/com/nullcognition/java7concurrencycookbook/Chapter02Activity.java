@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.nullcognition.java7concurrencycookbook.chapter02.AttrbInSync;
 import com.nullcognition.java7concurrencycookbook.chapter02.ConditionsSync;
+import com.nullcognition.java7concurrencycookbook.chapter02.ReadWriteL;
 import com.nullcognition.java7concurrencycookbook.chapter02.SyncLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
 
@@ -22,10 +23,32 @@ public class Chapter02Activity extends ActionBarActivity {
 //        synchMethod();
 //        attrbSync();
 //        conditionSync();
-        syncLock();
+//        syncLock();
+        readWriteLock();
 
 
         int i = 0; // debug point
+    }
+
+    private void readWriteLock() {
+        ReadWriteL priceInfo = new ReadWriteL();
+        ReadWriteL.Reader[] r = new ReadWriteL.Reader[5];
+
+        Thread[] rt = new Thread[5];
+
+        for (int i = 0; i < 5; i++) {
+            r[i] = new ReadWriteL.Reader(priceInfo);
+            rt[i] = new Thread(r[i]);
+        }
+
+        ReadWriteL.Writer writer = new ReadWriteL.Writer(priceInfo);
+        Thread wt = new Thread(writer);
+
+        for (int i = 0; i < 5; i++) {
+            rt[i].start();
+        }
+        wt.start();
+
     }
 
     private void syncLock() {
