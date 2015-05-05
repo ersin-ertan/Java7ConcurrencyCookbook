@@ -8,9 +8,12 @@ import android.view.MenuItem;
 
 import com.nullcognition.java7concurrencycookbook.chapter02.AttrbInSync;
 import com.nullcognition.java7concurrencycookbook.chapter02.ConditionsSync;
+import com.nullcognition.java7concurrencycookbook.chapter02.MultiConLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.ReadWriteL;
 import com.nullcognition.java7concurrencycookbook.chapter02.SyncLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
+
+import java.util.Random;
 
 
 public class Chapter02Activity extends ActionBarActivity {
@@ -24,10 +27,76 @@ public class Chapter02Activity extends ActionBarActivity {
 //        attrbSync();
 //        conditionSync();
 //        syncLock();
-        readWriteLock();
+//        readWriteLock();
+        multiConLock();
 
 
         int i = 0; // debug point
+    }
+
+    private void multiConLock() {
+        class Consumer implements Runnable {
+            private MultiConLock.Buffer buffer;
+
+            public Consumer(MultiConLock.Buffer b) {
+                buffer = b;
+            }
+
+            @Override
+            public void run() {
+                while (buffer.hasPendingLines()) {
+                    String line = buffer.get();
+                    processLine(line);
+                }
+            }
+
+            private void processLine(String line) {
+                try {
+                    Random random = new Random();
+                    Thread.sleep(random.nextInt(100));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        class Producer implements Runnable {
+            private MultiConLock mock;
+            private MultiConLock.Buffer buffer;
+
+            public Producer(MultiConLock mcl, MultiConLock.Buffer b) {
+                mock = mcl;
+                buffer = b;
+            }
+
+            @Override
+            public void run() {
+                buffer.setPendingLines(true);
+                while (mock.hasMoreLines()) {
+                    String line = mock.getLine();
+                    buffer.insert(line);
+                }
+                buffer.setPendingLines(false);
+            }
+        }
+
+        MultiConLock mock = new MultiConLock(100, 10);
+        MultiConLock.Buffer buffer = new MultiConLock.Buffer(20);
+
+        Producer p = new Producer(mock, buffer);
+        Thread pt = new Thread(p, "p");
+
+        Consumer[] c = new Consumer[3];
+        Thread[] ct = new Thread[3];
+
+        for (int i = 0; i < 3; i++) {
+            c[i] = new Consumer(buffer);
+            ct[i] = new Thread(c[i], "consumer@" + i);
+        }
+
+        pt.start();
+        for (int i = 0; i < 3; i++) {
+            ct[i].start();
+        }
     }
 
     private void readWriteLock() {
