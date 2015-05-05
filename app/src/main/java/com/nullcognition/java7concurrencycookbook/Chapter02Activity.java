@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.nullcognition.java7concurrencycookbook.chapter02.AttrbInSync;
 import com.nullcognition.java7concurrencycookbook.chapter02.ConditionsSync;
+import com.nullcognition.java7concurrencycookbook.chapter02.SyncLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
 
 
@@ -28,6 +29,14 @@ public class Chapter02Activity extends ActionBarActivity {
     }
 
     private void syncLock() {
+        SyncLock printQueue = new SyncLock();
+        Thread[] thread = new Thread[10];
+        for (int i = 0; i < 10; i++) {
+            thread[i] = new Thread(new SyncLock.Job(printQueue));
+        }
+        for (int i = 0; i < 10; ++i) {
+            thread[i].start();
+        }
 
     }
 
@@ -65,7 +74,7 @@ public class Chapter02Activity extends ActionBarActivity {
             t2.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             Log.e("attr", "cinema 1 " + cinema.getVacantC1());
             Log.e("attr", "cinema 2 " + cinema.getVacantC2());
         }
