@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nullcognition.java7concurrencycookbook.chapter02.AttrbInSync;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
 
 
@@ -17,8 +18,33 @@ public class Chapter02Activity extends ActionBarActivity {
         setContentView(R.layout.activity_chapter02);
 
 //        synchMethod();
+        attrbSync();
 
         int debugPoint = 0;
+    }
+
+    private void attrbSync() {
+        AttrbInSync.Cinema cinema = new AttrbInSync.Cinema();
+
+        AttrbInSync ticketOffice1 = new AttrbInSync(cinema);
+        AttrbInSync ticketOffice2 = new AttrbInSync(cinema);
+
+        Thread t1 = new Thread(ticketOffice1);
+        Thread t2 = new Thread(ticketOffice2);
+
+        t1.start();
+        t2.start();
+
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            Log.e("attr", "cinema 1 " + cinema.getVacantC1());
+            Log.e("attr", "cinema 2 " + cinema.getVacantC2());
+        }
+
     }
 
     private void synchMethod() {
