@@ -16,4 +16,8 @@ public class Pract02{
 	public void waitN(){
 		new WaitN();
 	}
+
+	public void usingLocks(){new UsingLocks();}
+
+	public void reentrantLocks(){new Reentr(); }
 }
