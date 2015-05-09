@@ -12,6 +12,8 @@ import com.nullcognition.java7concurrencycookbook.chapter02.MultiConLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.ReadWriteL;
 import com.nullcognition.java7concurrencycookbook.chapter02.SyncLock;
 import com.nullcognition.java7concurrencycookbook.chapter02.SynchMethodAndAccount;
+import com.nullcognition.java7concurrencycookbook.chapter02.pract.Pract02;
+import com.nullcognition.java7concurrencycookbook.chapter02.pract.TLCode;
 
 import java.util.Random;
 
@@ -28,13 +30,20 @@ public class Chapter02Activity extends ActionBarActivity {
 //        conditionSync();
 //        syncLock();
 //        readWriteLock();
-        multiConLock();
+//        multiConLock();
+	    pract02();
 
 
         int i = 0; // debug point
     }
 
-    private void multiConLock() {
+	private void pract02(){
+//		new Pract02().tl();
+//        new Pract02().wn();
+		new Pract02().waitN();
+	}
+
+	private void multiConLock() {
         class Consumer implements Runnable {
             private MultiConLock.Buffer buffer;
 
