@@ -42,7 +42,8 @@ public class Chapter02Activity extends ActionBarActivity{
 //		p.wn();
 //		p.waitN();
 //		p.usingLocks();
-		p.reentrantLocks();
+//		p.reentrantLocks();
+		p.rwlock();
 	}
 
 	private void multiConLock(){

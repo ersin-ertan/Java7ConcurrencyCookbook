@@ -20,4 +20,8 @@ public class Pract02{
 	public void usingLocks(){new UsingLocks();}
 
 	public void reentrantLocks(){new Reentr(); }
+
+	public void rwlock(){
+
+	}
 }
