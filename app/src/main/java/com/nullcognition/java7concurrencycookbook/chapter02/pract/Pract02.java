@@ -21,7 +21,7 @@ public class Pract02{
 
 	public void reentrantLocks(){new Reentr(); }
 
-	public void rwlock(){
+	public void rwlock(){ new RWLock().startThreads();}
 
-	}
+	public void multiConLock(){new MultiConLock().startThreads();}
 }
